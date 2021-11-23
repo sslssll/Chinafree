@@ -1,0 +1,22 @@
+server:
+  port: 8080
+mybatis:
+  mapperLocations: classpath*:com/chinafree/china_free_lance/registermodule/dao/sql/*.xml
+  configLocation: classpath:mybatis/mybatis-config.xml
+  basePackage: com.dino.registermodule.dao
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://121.41.36.222
+    username: root
+    password: 123456
+redis:
+  hostName: 192.168.1.40
+  port: 6379
+  usePool: true
+  password:
+  maxIdle: 200
+  maxTotal: 1000
+  blockWhenExhausted: true
+  maxWaitMillis: 30000
+  testOnBorrow: true
