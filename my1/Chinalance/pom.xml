@@ -117,6 +117,13 @@
             <version>1.7.25</version>
             <!-- <scope>test</scope> -->
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-core</artifactId>
+            <version>3.4.3.4</version>
+        </dependency>
+
+
     </dependencies>
 
     <build>
