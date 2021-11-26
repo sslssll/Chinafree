@@ -1,7 +1,5 @@
 package com.chinafree.auth.model.enumeration;
 
-import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
-import com.chinafree.auth.model.po.LoginUser;
 
 public enum Column {
 

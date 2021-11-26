@@ -105,7 +105,7 @@ public class NormalLoginServiceImpl implements NormalLoginService {
 
 
             return LoginResult.builder()
-                    .loginId(loginUser.getUserId())
+                    .loginId(loginUser.getLoginName())
                     .loginUserType(LoginType.LoginUserType.NORMAL.value)
                     .build();
     }

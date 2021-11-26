@@ -23,7 +23,7 @@ public class LoginUserServiceImpl implements LoginUserService {
     public LoginUser getLoginUserByLoginMail(String loginMail) {
         QueryWrapper<LoginUser> loginUserQueryWrapper = new QueryWrapper<>();
         loginUserQueryWrapper.eq(Column.LOGIN_MAIL.getColumn(), loginMail);
-        LoginUser user = userMapper.selectOne(loginUserQueryWrapper);
+        LoginUser user = userMapper.selectByMail(loginMail);
         return user;
     }
 
