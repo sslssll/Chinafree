@@ -3,6 +3,7 @@ package com.chinafree;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chinafree.auth.mapper.UserMapper;
+import com.chinafree.auth.model.enumeration.Column;
 import com.chinafree.auth.model.po.LoginUser;
 import com.mysql.cj.log.Log;
 import org.junit.jupiter.api.Test;
@@ -96,9 +97,10 @@ class ChinafreeApplicationTests {
     @Test
     public void testWrapSelect() {
         QueryWrapper<LoginUser> loginUserQueryWrapper = new QueryWrapper<>();
-        loginUserQueryWrapper.isNotNull("login_name").isNotNull("login_mail").eq("id", "1L");
-        userMapper.selectList(loginUserQueryWrapper);
-
+//        loginUserQueryWrapper.isNotNull("login_name").isNotNull("login_mail").eq("id", "1L");
+//        userMapper.selectList(loginUserQueryWrapper);
+        loginUserQueryWrapper.eq(Column.LOGIN_MAIL.getColumn(), "18080501029@qq.com");
+        LoginUser user = userMapper.selectOne(loginUserQueryWrapper);
     }
 
 
