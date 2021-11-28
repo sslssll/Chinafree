@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.chinafree.auth.mapper.UserMapper;
 import com.chinafree.auth.model.enumeration.Column;
+import com.chinafree.auth.model.po.BaseEntity;
 import com.chinafree.auth.model.po.LoginUser;
 import com.mysql.cj.log.Log;
 import org.junit.jupiter.api.Test;
@@ -40,10 +41,19 @@ class ChinafreeApplicationTests {
         System.out.println(insert);
     }
 
+    @Test
+    public void testBatchInsert() {
+        LoginUser build = LoginUser.builder().loginMail("123213@11.com").loginName("87e656").build();
+        int insert = userMapper.insert(build);
+        System.out.println("-----------tet---------");
+        System.out.println(insert);
+    }
+
 
     @Test
     public void testUpdate() {
-        int i = userMapper.updateById(LoginUser.builder().id(8L).loginName("000").build());
+//        BaseEntity.builder().id(8L);
+        int i = userMapper.updateById(LoginUser.builder().loginName("000").build());
         System.out.println(i);
     }
 

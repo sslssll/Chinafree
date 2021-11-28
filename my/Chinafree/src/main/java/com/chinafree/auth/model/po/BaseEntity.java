@@ -1,31 +1,29 @@
 package com.chinafree.auth.model.po;
 
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
+
+@Getter
+@Setter
 public class BaseEntity implements Serializable {
-    @Getter
-    @Setter
-    private String id;
-    @Getter
-    @Setter
-    private String createId;
-    @Getter
-    @Setter
-    private String updateId;
-    @Getter
-    @Setter
-    private Date createTime;
-    @Getter
-    @Setter
-    private Date updateTime;
-    @Getter
-    @Setter
-    private String businessBelong;
-    @Getter
-    @Setter
-    private String version;
+
+
+    @Version
+    private Integer version;
+
+    @TableLogic
+    private Integer deleted;
+
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    @TableField(value = "update_time", fill = FieldFill.UPDATE)
+    private LocalDateTime updateTime;
 }

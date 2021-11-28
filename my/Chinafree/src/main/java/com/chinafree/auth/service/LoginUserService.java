@@ -2,12 +2,13 @@ package com.chinafree.auth.service;
 
 
 import com.chinafree.auth.model.po.LoginUser;
+import com.chinafree.common.base.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = false)
-public interface LoginUserService  {
+//@Transactional(readOnly = false)
+public interface LoginUserService  extends BaseService<LoginUser,Long> {
     //根据邮箱获取用户信息
     LoginUser getLoginUserByLoginMail(String loginMail);
     //根据手机获取用户信息

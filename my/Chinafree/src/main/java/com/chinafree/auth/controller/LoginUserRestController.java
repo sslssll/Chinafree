@@ -31,7 +31,7 @@ public class LoginUserRestController  {
     public EntityResponse<LoginResult> emailLogin(@RequestBody RequestParameter<LoginParam> request) {
         LoginParam loginParam = request.getBody();
         LoginResult loginResult = loginService.loginByUsernameAndPwd(loginParam);
-        return new EntityResponse<>(ResponseCodeEnum.SUCCESS,"登录成功",null);
+        return new EntityResponse<>(ResponseCodeEnum.SUCCESS,"登录成功",loginResult);
 
     }
 
