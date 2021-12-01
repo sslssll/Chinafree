@@ -2,14 +2,14 @@ package com.chinafree;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.chinafree.auth.mapper.UserMapper;
 import com.chinafree.auth.model.enumeration.Column;
-import com.chinafree.auth.model.po.BaseEntity;
-import com.chinafree.auth.model.po.LoginUser;
-import com.mysql.cj.log.Log;
+import com.chinafree.auth.model.po.SysLoginUser;
+import com.chinafree.common.utils.MD5Utils;
+import com.chinafree.mapper.SysLoginUserMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.BoundValueOperations;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -19,15 +19,15 @@ import java.util.List;
 class ChinafreeApplicationTests {
 
     @Autowired
-    private UserMapper userMapper;
+    private SysLoginUserMapper userMapper;
 
     @Test
     void contextLoads() {
         //select
-        QueryWrapper<LoginUser> loginUserQueryWrapper = new QueryWrapper<>();
+        QueryWrapper<SysLoginUser> loginUserQueryWrapper = new QueryWrapper<>();
 //        loginUserQueryWrapper.eq("login_mail","1831027552@qq.com");
 
-        List<LoginUser> loginUsers = userMapper.selectList(null);
+        List<SysLoginUser> loginUsers = userMapper.selectList(null);
         System.out.println("------------------------------------------------------");
         loginUsers.forEach(System.out::println);
 
@@ -35,7 +35,7 @@ class ChinafreeApplicationTests {
 
     @Test
     public void testInsert() {
-        LoginUser build = LoginUser.builder().loginMail("123213@11.com").loginName("87e656").build();
+        SysLoginUser build = SysLoginUser.builder().loginMail("123213@11.com").loginName("87e656").build();
         int insert = userMapper.insert(build);
         System.out.println("-----------tet---------");
         System.out.println(insert);
@@ -43,7 +43,7 @@ class ChinafreeApplicationTests {
 
     @Test
     public void testBatchInsert() {
-        LoginUser build = LoginUser.builder().loginMail("123213@11.com").loginName("87e656").build();
+        SysLoginUser build = SysLoginUser.builder().loginMail("123213@11.com").loginName("87e656").build();
         int insert = userMapper.insert(build);
         System.out.println("-----------tet---------");
         System.out.println(insert);
@@ -53,16 +53,16 @@ class ChinafreeApplicationTests {
     @Test
     public void testUpdate() {
 //        BaseEntity.builder().id(8L);
-        int i = userMapper.updateById(LoginUser.builder().loginName("000").build());
+        int i = userMapper.updateById(SysLoginUser.builder().loginName("000").build());
         System.out.println(i);
     }
 
     @Test
     public void testOptimisticLocker() {
         //成功
-        LoginUser user = userMapper.selectById(1L);
+        SysLoginUser user = userMapper.selectById(1L);
         user.setLoginName("111111");
-        LoginUser user2 = userMapper.selectById(1L);
+        SysLoginUser user2 = userMapper.selectById(1L);
         user2.setLoginName("22222");
         userMapper.updateById(user2);
         userMapper.updateById(user);
@@ -72,7 +72,7 @@ class ChinafreeApplicationTests {
     //-------------select---------------------//
     @Test
     public void testSelectBatchIds() {
-        List<LoginUser> loginUsers = userMapper.selectBatchIds(Arrays.asList(1L, 2L, 3L));
+        List<SysLoginUser> loginUsers = userMapper.selectBatchIds(Arrays.asList(1L, 2L, 3L));
         loginUsers.forEach(System.out::println);
     }
 
@@ -82,7 +82,7 @@ class ChinafreeApplicationTests {
         HashMap<String, Object> map = new HashMap<>();
         //自定义
         map.put("login_name", "22222");
-        List<LoginUser> loginUsers = userMapper.selectByMap(map);
+        List<SysLoginUser> loginUsers = userMapper.selectByMap(map);
         loginUsers.forEach(System.out::println);
 
     }
@@ -91,7 +91,7 @@ class ChinafreeApplicationTests {
     //分页查询
     @Test
     public void testPage() {
-        Page<LoginUser> page = new Page<>(1, 5);
+        Page<SysLoginUser> page = new Page<>(1, 5);
         userMapper.selectPage(page, null);
         page.getRecords().forEach(System.out::println);
     }
@@ -106,11 +106,17 @@ class ChinafreeApplicationTests {
 
     @Test
     public void testWrapSelect() {
-        QueryWrapper<LoginUser> loginUserQueryWrapper = new QueryWrapper<>();
-//        loginUserQueryWrapper.isNotNull("login_name").isNotNull("login_mail").eq("id", "1L");
-//        userMapper.selectList(loginUserQueryWrapper);
-        loginUserQueryWrapper.eq(Column.LOGIN_MAIL.getColumn(), "18080501029@qq.com");
-        LoginUser user = userMapper.selectOne(loginUserQueryWrapper);
+//        QueryWrapper<SysLoginUser> loginUserQueryWrapper = new QueryWrapper<>();
+////        loginUserQueryWrapper.isNotNull("login_name").isNotNull("login_mail").eq("id", "1L");
+////        userMapper.selectList(loginUserQueryWrapper);
+//        loginUserQueryWrapper.eq(Column.LOGIN_MAIL.getColumn(), "1831027522@qq.com");
+//        SysLoginUser user = userMapper.selectOne(loginUserQueryWrapper);
+//        String hash = MD5Utils.hash("12345678");
+//        System.out.println(hash);
+
+
+
+
     }
 
 

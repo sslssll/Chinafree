@@ -32,7 +32,8 @@ public class LoginUserRestController  {
         LoginParam loginParam = request.getBody();
         LoginResult loginResult = loginService.loginByUsernameAndPwd(loginParam);
         return new EntityResponse<>(ResponseCodeEnum.SUCCESS,"登录成功",loginResult);
-
     }
+
+
 
 }

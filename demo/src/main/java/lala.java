@@ -1,27 +1,34 @@
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+// This file is auto-generated, don't edit it. Thanks.
 
+
+import com.aliyun.dysmsapi20170525.models.*;
+import com.aliyun.teaopenapi.models.*;
 
 public class lala {
-    public static void main(String[] args) {
 
+    /**
+     * 使用AK&SK初始化账号Client
+     * @param accessKeyId
+     * @param accessKeySecret
+     * @return Client
+     * @throws Exception
+     */
+    public static com.aliyun.dysmsapi20170525.Client createClient(String accessKeyId, String accessKeySecret) throws Exception {
+        Config config = new Config()
+                // 您的AccessKey ID
+                .setAccessKeyId(accessKeyId)
+                // 您的AccessKey Secret
+                .setAccessKeySecret(accessKeySecret);
+        // 访问的域名
+        config.endpoint = "dysmsapi.aliyuncs.com";
+        return new com.aliyun.dysmsapi20170525.Client(config);
+    }
 
-//<script>
-//                var dateRegex = /^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$/;
-//        $(".date").each(function(){
-//            if(!dateRegex.test($(this).val())){
-//                alert("日期格式不正确");
-//		<span style="white-space:pre">	</span>}
-//        });
-//
-//</script>
-
-        String str = "2021-11-25";
-        String pattern="^(([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))-02-29)$";
-
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(str);
-        System.out.println(m.matches());
-
+    public static void main(String[] args_) throws Exception {
+        java.util.List<String> args = java.util.Arrays.asList(args_);
+        com.aliyun.dysmsapi20170525.Client client = lala.createClient("accessKeyId", "accessKeySecret");
+        SendSmsRequest sendSmsRequest = new SendSmsRequest();
+        // 复制代码运行请自行打印 API 的返回值
+        client.sendSms(sendSmsRequest);
     }
 }

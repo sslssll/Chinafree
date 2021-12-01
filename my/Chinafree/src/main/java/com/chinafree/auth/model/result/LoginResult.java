@@ -1,7 +1,6 @@
 package com.chinafree.auth.model.result;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.util.List;
 
@@ -9,14 +8,17 @@ import java.util.List;
 /**
  * 用户登录返回值
  */
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Builder
-public class LoginResult {
-    private String loginId;
+@AllArgsConstructor
+public class LoginResult extends BaseResult {
+    private Long loginId;
     private Integer loginUserType;
     private String userType;
-    private String userId;
+    private Long userId;
     private boolean isRegister;
-//    private String token;
-//    private List<ThirdPartAccountResult> thirdPartAccountResults;
+    private String token;
+    private List<ThirdPartAccountResult> thirdPartAccountResults;
 }

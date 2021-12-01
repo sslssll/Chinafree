@@ -1,9 +1,11 @@
 package com.chinafree.auth.service.impl;
 
 import com.chinafree.auth.exception.BusinessException;
+import com.chinafree.auth.model.bo.LoginUserBo;
 import com.chinafree.auth.model.enumeration.LoginType;
-import com.chinafree.auth.model.po.LoginUser;
+import com.chinafree.auth.model.po.SysLoginRef;
 import com.chinafree.auth.model.result.LoginResult;
+import com.chinafree.auth.model.result.ThirdPartAccountResult;
 import com.chinafree.auth.service.LoginUserService;
 import com.chinafree.auth.service.NormalLoginService;
 
@@ -12,138 +14,132 @@ import com.chinafree.common.utils.MD5Utils;
 import com.chinafree.common.utils.RegexUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundValueOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class NormalLoginServiceImpl implements NormalLoginService {
 
+    private static long PASSWORD_EFFECTIVE_TIME = 15 * 60;
+    private static long TOKEN_EFFECTIVE_TIME = 100000000 * 60 * 60;
+    public static String LOGIN_TIMES_PREFIX = "LOGIN_TIMES_";
+    public static String TOKEN = "LG_";
 
-
+    @Autowired
+    private RedisTemplate redisTemplate;
     @Autowired
     private LoginUserService loginUserService;
 
     public LoginResult login(String loginMail, String password) {
 
-        String loginTimes = "0";
-        LoginUser loginUser;
-
         //1. 从数据库获取loginUser
-        loginUser = getLoginUser(loginMail);
+        LoginUserBo loginUserBo = queryLoginUser(loginMail);
 
-        //2.判断密码是否正确,
+        //2.判断密码是否正确,错误超多5次就冻结
+        checkPassword(loginMail, password, loginUserBo);
 
-        if(StringUtils.isEmpty(password)){
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "密码为空");
-        }
-        if (!loginUser.getPassword().equals(MD5Utils.hash(password))) {
-            //密码错误,向redis插入错误密码的记录,提示密码错误
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "密码错误");
-        }
+        //3.构造loginResult
+        LoginResult result = getLoginResult(loginUserBo);
+        return result;
 
+    }
 
-        SysLoginUserExample.builder()
-                .distinct(true)
-                .orderByClause("login_user")
-                .oredCriteria()
-                .build();
-
-
-        /*密码正确,就登录*/
-        this.loginUserStatusService.updateLoginUserStatus(loginUser.getId(), LoginUserConstant.LoginUserStatusType.NORMAL_STATUS);
-        LoginRef loginRef = loginUser.getLoginRef();
-        if (loginRef == null) {
+    private LoginResult getLoginResult(LoginUserBo loginUserBo) {
+        SysLoginRef sysLoginRef = loginUserBo.getSysLoginRef();
+        if (sysLoginRef == null) {
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "loginRef为空");
         }
 
-        if (StringUtils.isEmpty(password)) {
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR.toString(), "密码格式不正确");
-        }
+        Map<String,Long> map = new HashMap<>();
+        map.put("loginId", loginUserBo.getId());
+        map.put("userId",sysLoginRef.getUserId());
 
-//            //redis 记录错误次数
-//        String redisComponents = redisComponent.get(LOGIN_TIMES_PREFIX + loginMail);//从redis获取输入错误密码的记录
-//        if (StringUtils.isEmpty(redisComponents)) {
-//            if(StringUtils.isEmpty(loginUser.getPassword())){
-//                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,"您未设置密码!!");
-//            }
-//            //错误密码记录不存在,验证用户密码是否正确
-//            if (!loginUser.getPassword().equals(MD5Utils.hash(password))) {
-//                //密码错误,向redis插入错误密码的记录,提示密码错误
-////                redisComponent.set(LOGIN_TIMES_PREFIX + loginMail, loginTimes, PASSWORD_EFFECTIVE_TIME);
-//                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), "密码错误");
-//            }
-//        } else {
-//            //错误密码记录存在,就获取错误次数
-//            Integer cLoginTime = Integer.valueOf(redisComponent.get(LOGIN_TIMES_PREFIX + loginMail));
-//            if (cLoginTime < 5) {
-//                //错误次数不到5次,可以继续验证用户密码是否正确
-//                if (!loginUser.getPassword().equals(MD5Utils.hash(password))) {
-//                    //密码错误,错误次数+1并存入redis,提示密码错误
-//                    redisComponent.set(LOGIN_TIMES_PREFIX + loginMail, String.valueOf(cLoginTime + 1), PASSWORD_EFFECTIVE_TIME);
-//                    throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "密码错误");
-//                }
-//            } else {
-//                //错误次数达到5次,冻结用户,提示：输入密码错误超过5次请稍后重试
-//                //String loginId = this.loginUserService.getPrimaryKey();
-//                //this.loginUserStatusService.updateLoginUserStatus(loginId, LoginUserConstant.LoginUserStatusType.MORE_TIMES_STSTUS);
-//                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "输入密码错误超过5次，请稍后重试");
-//            }
-//        }
-//        /*密码正确,就登录*/
-//        //this.loginUserStatusService.updateLoginUserStatus(loginUser.getId(), LoginUserConstant.LoginUserStatusType.NORMAL_STATUS);
-//        LoginRef loginRef = loginUser.getLoginRef();
-//        if (loginRef == null) {
-//            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "loginRef为空");
-//        }
+        LoginResult result = new LoginResult();
+        result.setLoginId(loginUserBo.getId());
+        result.setLoginUserType(loginUserBo.getLoginUserType());
+        result.setUserId(sysLoginRef.getUserId());
 
-//        Map<String,String> map = new HashMap<>();
-//        map.put("loginId",loginUser.getId());
-//        map.put("userId",loginRef.getUserId());
-//        LoginResult result = new LoginResult();
-//        result.setLoginId(loginUser.getId());
-//        result.setLoginUserType(loginUser.getLoginUserType());
-//        result.setUserId(loginRef.getUserId());
-//        //通过LoginId查询第三方列表
-//        String loginId = loginUser.getId();
-//        List<ThirdPartAccount> thirdPartAccountList = this.thirdPartAccountDao.selectThirdPartAccountByLoginId(loginId);
-//        //填充List<ThirdPartAccountResult>信息
-//        List<ThirdPartAccountResult> thirdPartAccountResultList = new ArrayList<>();
-//        for (ThirdPartAccount thirdPartAccount :thirdPartAccountList){
-//            ThirdPartAccountResult thirdPartAccountResults = new ThirdPartAccountResult();
-//            BeanUtils.copyProperties(thirdPartAccount,thirdPartAccountResults);
-//            thirdPartAccountResultList.add(thirdPartAccountResults);
-//        }
-//        //将第三方列表信息塞入Result中
-//        result.setThirdPartAccountResults(thirdPartAccountResultList);
-//        result.setToken(loginUserService.getPrimaryKey());
-//        //将loginId和userId存入redis中
-//        redisComponent.set(TOKEN +result.getToken(),map,TOKEN_EFFECTIVE_TIME);
-//        return result;
+        //通过LoginId查询第三方列表
+        Long loginId = loginUserBo.getId();
+        List<ThirdPartAccountResult> thirdPartAccountByLoginId = loginUserService.getThirdPartAccountByLoginId(loginId);
 
-
-            return LoginResult.builder()
-                    .loginId(loginUser.getLoginName())
-                    .loginUserType(LoginType.LoginUserType.NORMAL.value)
-                    .build();
+        //将第三方列表信息塞入Result中
+        result.setThirdPartAccountResults(thirdPartAccountByLoginId);
+        result.setToken(UUID.randomUUID().toString().replaceAll("-", ""));
+        //将loginId和userId存入redis中
+        redisTemplate.opsForValue().set(TOKEN +result.getToken(),map,TOKEN_EFFECTIVE_TIME, TimeUnit.MILLISECONDS);
+        return result;
     }
 
-    private LoginUser getLoginUser(String loginMail) {
-        LoginUser loginUser;
+    /**
+     * 判断密码是否正确,错误超多5次就冻结
+     * @param loginMail
+     * @param password
+     * @param loginUserBo
+     */
+    private void checkPassword(String loginMail, String password, LoginUserBo loginUserBo) {
+        //密码输入错误次数
+        String loginTimes = "0";
+        BoundValueOperations redisWrongTimes = redisTemplate.boundValueOps(LOGIN_TIMES_PREFIX + loginMail);
+        String s = (String) redisWrongTimes.get();
+        if(StringUtils.isEmpty((String)redisWrongTimes.get())){
+            if(StringUtils.isEmpty(s)){
+                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,"您未设置密码!!");
+            }
+            //错误密码记录不存在,验证用户密码是否正确
+            if (!loginUserBo.getPassword().equals(MD5Utils.hash(password))) {
+                //密码错误,向redis插入错误密码的记录,提示密码错误
+                redisWrongTimes.set( loginTimes, PASSWORD_EFFECTIVE_TIME);
+                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "密码错误");
+            }
+        }else {
+            //错误密码记录存在,就获取错误次数
+            Integer cLoginTime = (Integer)redisWrongTimes.get();
+            if (cLoginTime < 5) {
+                //错误次数不到5次,可以继续验证用户密码是否正确
+                if (!loginUserBo.getPassword().equals(MD5Utils.hash(password))) {
+                    //密码错误,错误次数+1并存入redis,提示密码错误
+                    redisWrongTimes.set(String.valueOf(cLoginTime+1),PASSWORD_EFFECTIVE_TIME);
+                    throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "密码错误");
+                }
+            } else {
+                //错误次数达到5次,冻结用户,提示：输入密码错误超过5次请稍后重试
+                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "输入密码错误超过5次，请稍后重试");
+            }
+        }
+    }
+
+
+    /**
+     *  从数据库获取loginUser
+     * @param loginMail
+     * @return
+     */
+    private LoginUserBo queryLoginUser(String loginMail) {
+        LoginUserBo loginUserbo;
         //判断loginMail是邮箱
         if (RegexUtils.checkMail(loginMail)) {
             //根据邮箱获取用户
-            loginUser = loginUserService.getLoginUserByLoginMail(loginMail);
+            loginUserbo = loginUserService.getLoginUserByLoginMail(loginMail);
         } else if (RegexUtils.checkMobile(loginMail)) {
             //根据手机号获取用户
-            loginUser = loginUserService.getLoginUserByLoginMobile(loginMail);
+            loginUserbo = loginUserService.getLoginUserByLoginMobile(loginMail);
         } else {
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "邮箱或手机格式不正确");
         }
-        if (loginUser == null) {
+        if (loginUserbo == null) {
             //用户不存在
             //throw new NotFindLoginUserException();
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,"用户不存在！");
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "用户不存在！");
         }
-        return loginUser;
+        return loginUserbo;
 
     }
 

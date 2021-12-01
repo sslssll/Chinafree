@@ -5,25 +5,16 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
-
-@Setter
 @Getter
-public class SysLoginLog {
-
+@Setter
+public class SysThirdPartAccount {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private String loginName;
+    private Long loginId;
 
-    private Integer loginType;
+    private String openId;
 
-    private Integer loginPlatform;
-
-    private Integer loginIp;
-
-    private Date loginDateTime;
-
-    private Integer loginFlag;
+    private String thirdPartyAccountType;
 
 }
