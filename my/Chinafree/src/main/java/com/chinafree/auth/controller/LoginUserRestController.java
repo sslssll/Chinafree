@@ -34,6 +34,4 @@ public class LoginUserRestController  {
         return new EntityResponse<>(ResponseCodeEnum.SUCCESS,"登录成功",loginResult);
     }
 
-
-
 }
