@@ -1,7 +1,7 @@
 package com.chinafree.auth.model.bo;
 
 
-import com.chinafree.auth.model.po.SysLoginRef;
+import com.chinafree.auth.model.po.User;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 public class LoginUserBo {
+    //loginId
     private Long id;
     private String loginName;
     private String loginMobile;
@@ -25,7 +26,6 @@ public class LoginUserBo {
     private String lastLoginIp;
     private String lastLoginDevice;
     private Integer loginUserType;
-
-    private SysLoginRef sysLoginRef;
-
+    //user
+    private User user;
 }

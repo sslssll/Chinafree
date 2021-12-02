@@ -1,11 +1,13 @@
 package com.chinafree.auth.service;
 
+import com.chinafree.auth.model.param.RegistrationParam;
+import com.chinafree.common.model.response.BaseResponse;
 import org.springframework.stereotype.Service;
 
-@Service
 public interface RegisterService {
 
 
-    void sendRegisterVerificationCode(String phoneNumber);
+    BaseResponse sendRegisterVerificationCode(String phoneNumber);
 
+    void registerByPhoneAndCode(RegistrationParam body);
 }

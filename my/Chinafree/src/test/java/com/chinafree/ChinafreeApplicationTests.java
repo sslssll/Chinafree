@@ -2,14 +2,18 @@ package com.chinafree;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.chinafree.auth.model.enumeration.Column;
+import com.chinafree.auth.controller.LoginUserRestController;
+import com.chinafree.auth.controller.RegisterController;
+import com.chinafree.auth.model.param.LoginParam;
+import com.chinafree.auth.model.param.RegistrationParam;
 import com.chinafree.auth.model.po.SysLoginUser;
-import com.chinafree.common.utils.MD5Utils;
+import com.chinafree.auth.model.result.LoginResult;
+import com.chinafree.common.model.request.RequestParameter;
+import com.chinafree.common.model.response.EntityResponse;
 import com.chinafree.mapper.SysLoginUserMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.BoundValueOperations;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,7 +118,36 @@ class ChinafreeApplicationTests {
 //        String hash = MD5Utils.hash("12345678");
 //        System.out.println(hash);
 
+    }
 
+
+
+    @Autowired
+    RegisterController registerController;
+    @Test
+    public void registration(){
+        String phone = "17367115251";
+        registerController.sendRegisterVerificationCode(phone);
+        RegistrationParam registrationParam = new RegistrationParam();
+        registrationParam.setPassword("111111111");
+        registrationParam.setVerification("000000");
+        registrationParam.setPhoneNumber(phone);
+        registerController.registerByPhoneAndCode(new RequestParameter<>(registrationParam));
+
+    }
+
+    @Autowired
+    LoginUserRestController loginUserRestController;
+
+    @Test
+    public void login(){
+        LoginParam loginParam = new LoginParam();
+        loginParam.setPassword("000000");
+        loginParam.setUsername("17367115251");
+//        loginUserRestController.emailLogin(new RequestParameter<>(loginParam));
+
+        loginUserRestController.sendLoginVerfication("17367115251");
+        EntityResponse<LoginResult> loginResultEntityResponse = loginUserRestController.LoginByPhoneAndVerfication(new RequestParameter<>(loginParam));
 
 
     }

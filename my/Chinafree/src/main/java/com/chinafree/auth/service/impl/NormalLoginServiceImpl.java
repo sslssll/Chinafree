@@ -2,8 +2,8 @@ package com.chinafree.auth.service.impl;
 
 import com.chinafree.auth.exception.BusinessException;
 import com.chinafree.auth.model.bo.LoginUserBo;
-import com.chinafree.auth.model.enumeration.LoginType;
-import com.chinafree.auth.model.po.SysLoginRef;
+import com.chinafree.auth.model.po.SysLoginLog;
+import com.chinafree.auth.model.po.User;
 import com.chinafree.auth.model.result.LoginResult;
 import com.chinafree.auth.model.result.ThirdPartAccountResult;
 import com.chinafree.auth.service.LoginUserService;
@@ -12,6 +12,7 @@ import com.chinafree.auth.service.NormalLoginService;
 import com.chinafree.common.base.HttpStatus;
 import com.chinafree.common.utils.MD5Utils;
 import com.chinafree.common.utils.RegexUtils;
+import com.chinafree.mapper.SysLoginLogMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundValueOperations;
@@ -37,6 +38,9 @@ public class NormalLoginServiceImpl implements NormalLoginService {
     @Autowired
     private LoginUserService loginUserService;
 
+    @Autowired
+    private SysLoginLogMapper sysLoginLogMapper;
+
     public LoginResult login(String loginMail, String password) {
 
         //1. 从数据库获取loginUser
@@ -47,34 +51,42 @@ public class NormalLoginServiceImpl implements NormalLoginService {
 
         //3.构造loginResult
         LoginResult result = getLoginResult(loginUserBo);
+
+        //4.构造登录日志
+        SysLoginLog build = SysLoginLog.builder()
+                .loginName(result.getUserId().toString())
+                .build();
+        sysLoginLogMapper.insert(build);
         return result;
 
     }
 
-    private LoginResult getLoginResult(LoginUserBo loginUserBo) {
-        SysLoginRef sysLoginRef = loginUserBo.getSysLoginRef();
-        if (sysLoginRef == null) {
-            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "loginRef为空");
+    @Override
+    public LoginResult getLoginResult(LoginUserBo loginUserBo) {
+//        SysLoginRef sysLoginRef = loginUserBo.getSysLoginRef();
+        final User user = loginUserBo.getUser();
+        if (user == null) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "user为空");
         }
 
         Map<String,Long> map = new HashMap<>();
         map.put("loginId", loginUserBo.getId());
-        map.put("userId",sysLoginRef.getUserId());
+        map.put("userId",user.getId());
 
         LoginResult result = new LoginResult();
         result.setLoginId(loginUserBo.getId());
         result.setLoginUserType(loginUserBo.getLoginUserType());
-        result.setUserId(sysLoginRef.getUserId());
+        result.setUserId(user.getId());
+        //////////设置一个token
 
-        //通过LoginId查询第三方列表
-        Long loginId = loginUserBo.getId();
-        List<ThirdPartAccountResult> thirdPartAccountByLoginId = loginUserService.getThirdPartAccountByLoginId(loginId);
 
-        //将第三方列表信息塞入Result中
-        result.setThirdPartAccountResults(thirdPartAccountByLoginId);
-        result.setToken(UUID.randomUUID().toString().replaceAll("-", ""));
+
+
+
+
+
         //将loginId和userId存入redis中
-        redisTemplate.opsForValue().set(TOKEN +result.getToken(),map,TOKEN_EFFECTIVE_TIME, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(TOKEN +result.getToken(),map,2, TimeUnit.HOURS);
         return result;
     }
 
@@ -89,8 +101,9 @@ public class NormalLoginServiceImpl implements NormalLoginService {
         String loginTimes = "0";
         BoundValueOperations redisWrongTimes = redisTemplate.boundValueOps(LOGIN_TIMES_PREFIX + loginMail);
         String s = (String) redisWrongTimes.get();
+        boolean empty = StringUtils.isEmpty((String) redisWrongTimes.get());
         if(StringUtils.isEmpty((String)redisWrongTimes.get())){
-            if(StringUtils.isEmpty(s)){
+            if(StringUtils.isEmpty(loginUserBo.getPassword())){
                 throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,"您未设置密码!!");
             }
             //错误密码记录不存在,验证用户密码是否正确

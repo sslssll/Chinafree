@@ -1,16 +1,18 @@
 package com.chinafree.auth.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.chinafree.auth.exception.BusinessException;
 import com.chinafree.auth.model.bo.LoginUserBo;
 import com.chinafree.auth.model.enumeration.Column;
-import com.chinafree.auth.model.po.SysLoginRef;
 import com.chinafree.auth.model.po.SysLoginUser;
 import com.chinafree.auth.model.po.SysThirdPartAccount;
+import com.chinafree.auth.model.po.User;
 import com.chinafree.auth.model.result.ThirdPartAccountResult;
 import com.chinafree.auth.service.LoginUserService;
-import com.chinafree.mapper.SysLoginRefMapper;
+import com.chinafree.common.model.enumeration.ResponseCodeEnum;
 import com.chinafree.mapper.SysLoginUserMapper;
 import com.chinafree.mapper.SysThirdPartAccountMapper;
+import com.chinafree.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.chinafree.auth.mapping.LoginUserMapping;
@@ -21,9 +23,9 @@ import java.util.List;
 public class LoginUserServiceImpl implements LoginUserService {
 
     @Autowired
-    private SysLoginUserMapper userMapper;
+    private SysLoginUserMapper sysLoginUserMapper;
     @Autowired
-    private SysLoginRefMapper loginRefMapper;
+    private UserMapper userMapper;
     @Autowired
     private SysThirdPartAccountMapper thirdPartAccountMapper;
 
@@ -33,7 +35,7 @@ public class LoginUserServiceImpl implements LoginUserService {
 //        loginUserQueryWrapper.isNotNull("login_name").isNotNull("login_mail").eq("id", "1L");
 //        userMapper.selectList(loginUserQueryWrapper);
         QueryWrapper<SysLoginUser> eq = loginUserQueryWrapper.eq(Column.LOGIN_MAIL.getColumn(), loginMail);
-        SysLoginUser sysLoginUser = userMapper.selectOne(eq);
+        SysLoginUser sysLoginUser = sysLoginUserMapper.selectOne(eq);
         return initLoginUserRef(sysLoginUser);
     }
 
@@ -42,7 +44,7 @@ public class LoginUserServiceImpl implements LoginUserService {
     public LoginUserBo getLoginUserByLoginMobile(String loginMail) {
         QueryWrapper<SysLoginUser> loginUserQueryWrapper = new QueryWrapper<>();
         loginUserQueryWrapper.eq(Column.LOGIN_MOBILE.getColumn(), loginMail);
-        final SysLoginUser sysLoginUser = userMapper.selectOne(loginUserQueryWrapper);
+        final SysLoginUser sysLoginUser = sysLoginUserMapper.selectOne(loginUserQueryWrapper);
         return initLoginUserRef(sysLoginUser);
     }
 
@@ -58,12 +60,15 @@ public class LoginUserServiceImpl implements LoginUserService {
      */
     private LoginUserBo initLoginUserRef(SysLoginUser loginUser) {
         if (loginUser == null) {
-            return null;
+            throw new BusinessException(ResponseCodeEnum.FORBIDDEN.toString(),"登录用户名不存在");
         }
         LoginUserBo loginUserBo = LoginUserMapping.loginUserMapping.sysLoginUserToBo(loginUser);
         Long loginId = loginUser.getId();
-        SysLoginRef loginRef = loginRefMapper.selectOne(new QueryWrapper<SysLoginRef>().eq("login_id", loginId));
-        loginUserBo.setSysLoginRef(loginRef);
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("login_user_id", loginId));
+        if(user == null){
+            throw new BusinessException(ResponseCodeEnum.FORBIDDEN.toString(),"该用户不存在");
+        }
+        loginUserBo.setUser(user);
         return loginUserBo;
     }
 

@@ -8,15 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 @Mapper
 public interface SysLoginShortMessageMapper extends BaseMapper<SysLoginShortMessage> {
-    int deleteByPrimaryKey(String id);
 
-    int insert(SysLoginShortMessage record);
-
-    int insertSelective(SysLoginShortMessage record);
-
-    SysLoginShortMessage selectByPrimaryKey(String id);
-
-    int updateByPrimaryKeySelective(SysLoginShortMessage record);
-
-    int updateByPrimaryKey(SysLoginShortMessage record);
 }
