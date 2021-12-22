@@ -12,10 +12,16 @@
             <property name="suppressAllComments" value="true" />
         </commentGenerator>
         <!--数据库连接的信息：驱动类、连接地址、用户名、密码 -->
-        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/register" userId="admin"
-                        password="root">
-        </jdbcConnection>
+<!--        <jdbcConnection driverClass="com.mysql.jdbc.Driver"-->
+<!--                        connectionURL="jdbc:mysql://localhost:3306/register" userId="admin"-->
+<!--                        password="root">-->
+<!--        </jdbcConnection>-->
+
+                <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                                connectionURL="rm-bp1c2709it9s4ww7kfo.mysql.rds.aliyuncs.com"
+                                userId="sarah"
+                                password="86857765&qwert">
+                </jdbcConnection>
         <!-- 默认false，把JDBC DECIMAL 和 NUMERIC 类型解析为 Integer，为 true时把JDBC DECIMAL 和
            NUMERIC 类型解析为java.math.BigDecimal -->
         <javaTypeResolver>

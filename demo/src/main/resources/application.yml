@@ -1,0 +1,21 @@
+
+
+
+
+datasource.serverName.list: config
+datasource:
+  config:
+    dataSourceInfoMap:
+      "[cpprd]":
+        driverClassName: com.mysql.cj.jdbc.Driver
+        jdbcUrl: jdbc:mysql://dev.ceowuwkwcz9h.rds.cn-north-1.amazonaws.com.cn:3306/em?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false
+        maximumPoolSize: 200
+        minimumIdle: 100
+        password: '!!123abc'
+        username: cloudpenseuser
+      "[config]":
+        driverClassName: com.mysql.cj.jdbc.Driver
+        jdbcUrl: jdbc:mysql://rds-qa.ceowuwkwcz9h.rds.cn-north-1.amazonaws.com.cn:3306/config?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull
+        maximumPoolSize: 5
+        password: '!!123abc'
+        username: cloudpenseuser
